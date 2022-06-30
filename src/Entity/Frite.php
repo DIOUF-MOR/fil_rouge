@@ -5,22 +5,22 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use App\Repository\BurgerRepository;
+use App\Repository\FritesRepository;
 use ApiPlatform\Core\Annotation\ApiResource;
-use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ORM\Entity(repositoryClass: BurgerRepository::class)]
+#[ORM\Entity(repositoryClass: FritesRepository::class)]
 #[ApiResource(
-    normalizationContext: ["groups"=>["burger:read"]]
+    normalizationContext: ["groups"=>["frite:read"]]
 )]
-class Burger extends Produit
+class Frite extends Produit
 {
-    #[ORM\ManyToMany(targetEntity: Menu::class, mappedBy: 'burgers')]
+   
+    #[ORM\ManyToMany(targetEntity: Menu::class, mappedBy: 'frites')]
     private $menus;
 
-    public function __construct()
-    {
-        parent::__construct();
+    public function __construct(){
+
+        $this->nom="portion_frite";
         $this->menus = new ArrayCollection();
     }
 
@@ -36,7 +36,7 @@ class Burger extends Produit
     {
         if (!$this->menus->contains($menu)) {
             $this->menus[] = $menu;
-            $menu->addBurger($this);
+            $menu->addFrite($this);
         }
 
         return $this;
@@ -45,9 +45,10 @@ class Burger extends Produit
     public function removeMenu(Menu $menu): self
     {
         if ($this->menus->removeElement($menu)) {
-            $menu->removeBurger($this);
+            $menu->removeFrite($this);
         }
 
         return $this;
     }
+
 }

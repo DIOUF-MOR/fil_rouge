@@ -2,34 +2,65 @@
 
 namespace App\Entity;
 
-use App\Repository\ProduitRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use App\Entity\Commande;
+use App\Entity\Gestionnaire;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\ProduitRepository;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ProduitRepository::class)]
+#[ORM\InheritanceType('JOINED')]
+#[ORM\DiscriminatorColumn(name:"genre",type:"string")]
+#[ORM\DiscriminatorMap(["burger"=>"Burger","menu"=>"Menu","boisson"=>"Boisson","frite"=>"Frite"])]
+#[ApiResource(
+    normalizationContext: ["groups"=>["produit:read"]]
+)]
 class Produit 
 {
+    #[Groups(["burger:read","boisson:read","menu:read","frite:read"])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    private $id;
+    protected $id;
 
+    #[Groups(["burger:read","boisson:read","menu:read","frite:read"])]
     #[ORM\Column(type: 'string', length: 50)]
-    private $nom;
+    protected $nom;
 
-    #[ORM\Column(type: 'string', length: 100)]
-    private $image;
-
+    
+    #[Groups(["burger:read","boisson:read","menu:read","frite:read"])]
     #[ORM\Column(type: 'float')]
-    private $prix;
+    protected $prix;
 
     #[ORM\ManyToMany(targetEntity: Commande::class, mappedBy: 'produits')]
-    private $commandes;
+    protected $commandes;
+
+   
+    #[Groups(["burger:read","boisson:read","menu:read","frite:read"])]
+    #[ORM\Column(type: 'text')]
+    protected $image;
+
+    #[Groups(["burger:read","boisson:read","menu:read","frite:read"])]
+    #[ORM\Column(type: 'integer')]
+    protected $etat;
+
+    #[Groups(["burger:read","boisson:read","menu:read","frite:read"])]
+    #[ORM\ManyToOne(targetEntity: Gestionnaire::class, inversedBy: 'produits')]
+    protected $gestionnaire;
+
+    #[Groups(["burger:read","boisson:read","menu:read","frite:read"])]
+    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    protected $description;
+
+
 
     public function __construct()
     {
         $this->commandes = new ArrayCollection();
+        
     }
 
     public function getId(): ?int
@@ -49,17 +80,7 @@ class Produit
         return $this;
     }
 
-    public function getImage(): ?string
-    {
-        return $this->image;
-    }
-
-    public function setImage(string $image): self
-    {
-        $this->image = $image;
-
-        return $this;
-    }
+    
 
     public function getPrix(): ?float
     {
@@ -100,5 +121,53 @@ class Produit
         return $this;
     }
 
-   
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(string $image): self
+    {
+        $this->image = $image;
+
+        return $this;
+    }
+
+
+    public function getEtat(): ?string
+    {
+        return $this->etat;
+    }
+
+    public function setEtat(string $etat): self
+    {
+        $this->etat = $etat;
+
+        return $this;
+    }
+
+    public function getGestionnaire(): ?Gestionnaire
+    {
+        return $this->gestionnaire;
+    }
+
+    public function setGestionnaire(?Gestionnaire $gestionnaire): self
+    {
+        $this->gestionnaire = $gestionnaire;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
 }

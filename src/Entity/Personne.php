@@ -2,8 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\PersonneRepository;
+use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\PersonneRepository;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 #[ORM\Entity(repositoryClass: PersonneRepository::class)]
 #[ORM\InheritanceType('JOINED')]
@@ -14,13 +17,16 @@ class Personne
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    private $id;
+    protected $id;
 
+    #[Assert\NotBlank(message:"Ce champ ne peut pas etre vide")]
+    #[Groups(["client:read","gestionnaire:read","livreur:read"])]
     #[ORM\Column(type: 'string', length: 255)]
-    private $nom;
+    protected $nom;
 
+    #[Groups(["client:read","gestionnaire:read","livreur:read"])]
     #[ORM\Column(type: 'string', length: 50)]
-    private $prenom;
+    protected $prenom;
 
     public function getId(): ?int
     {

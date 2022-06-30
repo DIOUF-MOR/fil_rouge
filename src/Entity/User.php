@@ -2,10 +2,12 @@
 
 namespace App\Entity;
 
-use App\Repository\UserRepository;
+use App\Entity\Personne;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use App\Repository\UserRepository;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\InheritanceType('JOINED')]
@@ -13,24 +15,29 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[ORM\DiscriminatorMap(["client"=>"Client","gestionnaire"=>"Gestionnaire","livreur"=>"Livreur"])]
 class User extends Personne implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private $id;
 
+   
+    #[Groups(["client:read","gestionnaire:read","livreur:read"])]
     #[ORM\Column(type: 'string', length: 180, unique: true)]
-    private $login;
+    protected $login;
 
+    #[Groups(["client:read","gestionnaire:read","livreur:read"])]
     #[ORM\Column(type: 'json')]
-    private $roles = [];
+    protected $roles = [];
 
     #[ORM\Column(type: 'string')]
-    private $password;
+    protected $password;
 
-    public function getId(): ?int
-    {
-        return $this->id;
+
+    public function __construct(){
+        $table= get_called_class();
+        $table= explode('\\',$table);
+        $table = strtoupper($table[2]);
+       $this->roles[]= 'ROLE_VISITEUR';
+       $this->roles[]= 'ROLE_'.$table;
+       
     }
+  
 
     public function getLogin(): ?string
     {
@@ -61,7 +68,7 @@ class User extends Personne implements UserInterface, PasswordAuthenticatedUserI
     {
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
-        $roles = ['ROLE_USER'];
+        // $roles[] = "ROLE_VISITEUR";
 
         return array_unique($roles);
     }
@@ -69,6 +76,8 @@ class User extends Personne implements UserInterface, PasswordAuthenticatedUserI
     public function setRoles(array $roles): self
     {
         $this->roles = $roles;
+
+
 
         return $this;
     }
