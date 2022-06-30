@@ -11,10 +11,20 @@ use ApiPlatform\Core\Annotation\ApiResource;
 #[ApiResource(
     normalizationContext: ["groups"=>["client:read"]]
 )]
-
-class Client extends User 
+class Client extends User
 {
-    
+    #[ORM\Column(type: 'string', length: 50)]
+    private $Téléphone;
 
-    
+    public function getTéléphone(): ?string
+    {
+        return $this->Téléphone;
+    }
+
+    public function setTéléphone(string $Téléphone): self
+    {
+        $this->Téléphone = $Téléphone;
+
+        return $this;
+    }
 }

@@ -12,6 +12,7 @@ class MailerService{
         $this->mailer = $mailer;
         $this->twig = $twig;
     }
+    
     public function sendEmail($user,$objet='Creation de compte'){
         $email=(new Email())
             ->from('daaroukhoudos04@gmail.com')//ki koy yonei

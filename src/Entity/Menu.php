@@ -20,8 +20,9 @@ class Menu extends Produit
     #[ORM\ManyToMany(targetEntity: Frite::class, inversedBy: 'menus')]
     private $frites;
 
-    #[ORM\ManyToMany(targetEntity: Tailleboisson::class, inversedBy: 'menus')]
-    private $tailleboissons;
+    #[ORM\ManyToMany(targetEntity: Boisson::class, inversedBy: 'menus')]
+    private $boissons;
+
 
 
     public function __construct()
@@ -29,7 +30,8 @@ class Menu extends Produit
         parent::__construct();
         $this->burgers = new ArrayCollection();
         $this->frites = new ArrayCollection();
-        $this->tailleboissons = new ArrayCollection();
+        $this->boissons = new ArrayCollection();
+       
        
     }
 
@@ -57,53 +59,31 @@ class Menu extends Produit
         return $this;
     }
 
+  
+   
+
     /**
-     * @return Collection<int, Frite>
+     * @return Collection<int, Boisson>
      */
-    public function getFrites(): Collection
+    public function getBoissons(): Collection
     {
-        return $this->frites;
+        return $this->boissons;
     }
 
-    public function addFrite(Frite $frite): self
+    public function addBoisson(Boisson $boisson): self
     {
-        if (!$this->frites->contains($frite)) {
-            $this->frites[] = $frite;
+        if (!$this->boissons->contains($boisson)) {
+            $this->boissons[] = $boisson;
         }
 
         return $this;
     }
 
-    public function removeFrite(Frite $frite): self
+    public function removeBoisson(Boisson $boisson): self
     {
-        $this->frites->removeElement($frite);
+        $this->boissons->removeElement($boisson);
 
         return $this;
     }
-
-    /**
-     * @return Collection<int, Tailleboisson>
-     */
-    public function getTailleboissons(): Collection
-    {
-        return $this->tailleboissons;
-    }
-
-    public function addTailleboisson(Tailleboisson $tailleboisson): self
-    {
-        if (!$this->tailleboissons->contains($tailleboisson)) {
-            $this->tailleboissons[] = $tailleboisson;
-        }
-
-        return $this;
-    }
-
-    public function removeTailleboisson(Tailleboisson $tailleboisson): self
-    {
-        $this->tailleboissons->removeElement($tailleboisson);
-
-        return $this;
-    }
-
    
 }

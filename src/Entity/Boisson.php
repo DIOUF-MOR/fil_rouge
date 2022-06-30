@@ -17,40 +17,92 @@ class Boisson extends Produit
     #[ORM\ManyToMany(targetEntity: Menu::class, mappedBy: 'boissons')]
     private $menus;
 
-    #[ORM\ManyToMany(targetEntity: Tailleboisson::class, mappedBy: 'boissons')]
-    private $tailleboissons;
+    #[ORM\ManyToMany(targetEntity: Taille::class, inversedBy: 'boissons')]
+    private $tailles;
 
     public function __construct()
     {
         parent::__construct();
         $this->menus = new ArrayCollection();
-        $this->tailleboissons = new ArrayCollection();
+        $this->tailles = new ArrayCollection();
     }
 
+    // #[ORM\OneToMany(targetEntity: BoissonTaille::class, mappedBy: 'boisson')]
+    // private $boissonTailles;
+
+    // public function __construct()
+    // {
+    //     parent::__construct();
+    //     $this->boissonTailles = new ArrayCollection();
+    // }
 
     /**
-     * @return Collection<int, Tailleboisson>
+     * Get the value of boissonTailles
+     */ 
+    // public function getBoissonTailles()
+    // {
+    //     return $this->boissonTailles;
+    // }
+
+    /**
+     * Set the value of boissonTailles
+     *
+     * @return  self
+     */ 
+    // public function setBoissonTailles($boissonTailles)
+    // {
+    //     $this->boissonTailles = $boissonTailles;
+
+    //     return $this;
+    // }
+
+    /**
+     * @return Collection<int, Menu>
      */
-    public function getTailleboissons(): Collection
+    public function getMenus(): Collection
     {
-        return $this->tailleboissons;
+        return $this->menus;
     }
 
-    public function addTailleboisson(Tailleboisson $tailleboisson): self
+    public function addMenu(Menu $menu): self
     {
-        if (!$this->tailleboissons->contains($tailleboisson)) {
-            $this->tailleboissons[] = $tailleboisson;
-            $tailleboisson->addBoisson($this);
+        if (!$this->menus->contains($menu)) {
+            $this->menus[] = $menu;
+            $menu->addBoisson($this);
         }
 
         return $this;
     }
 
-    public function removeTailleboisson(Tailleboisson $tailleboisson): self
+    public function removeMenu(Menu $menu): self
     {
-        if ($this->tailleboissons->removeElement($tailleboisson)) {
-            $tailleboisson->removeBoisson($this);
+        if ($this->menus->removeElement($menu)) {
+            $menu->removeBoisson($this);
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Taille>
+     */
+    public function getTailles(): Collection
+    {
+        return $this->tailles;
+    }
+
+    public function addTaille(Taille $taille): self
+    {
+        if (!$this->tailles->contains($taille)) {
+            $this->tailles[] = $taille;
+        }
+
+        return $this;
+    }
+
+    public function removeTaille(Taille $taille): self
+    {
+        $this->tailles->removeElement($taille);
 
         return $this;
     }
