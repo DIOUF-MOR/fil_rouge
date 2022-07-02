@@ -35,33 +35,33 @@ class Produit
     #[ORM\Column(type: 'float')]
     protected $prix;
 
-    #[ORM\ManyToMany(targetEntity: Commande::class, mappedBy: 'produits')]
-    protected $commandes;
-
    
-    #[Groups(["burger:read","boisson:read","menu:read","frite:read"])]
+    #[Groups(["burger:read","boisson:read","menu:read","frite:read","lignecommande:read","commande:read"])]
     #[ORM\Column(type: 'text')]
     protected $image;
 
-    #[Groups(["burger:read","boisson:read","menu:read","frite:read"])]
+    #[Groups(["burger:read","boisson:read","menu:read","frite:read","lignecommande:read","commande:read"])]
     #[ORM\Column(type: 'integer')]
     protected $etat;
 
-    #[Groups(["burger:read","boisson:read","menu:read","frite:read"])]
+    #[Groups(["burger:read","boisson:read","menu:read","frite:read","lignecommande:read","commande:read"])]
     #[ORM\ManyToOne(targetEntity: Gestionnaire::class, inversedBy: 'produits')]
     protected $gestionnaire;
 
-    #[Groups(["burger:read","boisson:read","menu:read","frite:read"])]
+    #[Groups(["burger:read","boisson:read","menu:read","frite:read",])]
     #[ORM\Column(type: 'string', length: 100, nullable: true)]
     protected $description;
 
-
+    #[ORM\OneToMany(mappedBy: 'produit', targetEntity: Lignecommande::class)]
+    private $lignecommandes;
 
     public function __construct()
     {
-        $this->commandes = new ArrayCollection();
-        
+        $this->lignecommandes = new ArrayCollection();
     }
+
+  
+
 
     public function getId(): ?int
     {
@@ -94,33 +94,7 @@ class Produit
         return $this;
     }
 
-    /**
-     * @return Collection<int, Commande>
-     */
-    public function getCommandes(): Collection
-    {
-        return $this->commandes;
-    }
-
-    public function addCommande(Commande $commande): self
-    {
-        if (!$this->commandes->contains($commande)) {
-            $this->commandes[] = $commande;
-            $commande->addProduit($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCommande(Commande $commande): self
-    {
-        if ($this->commandes->removeElement($commande)) {
-            $commande->removeProduit($this);
-        }
-
-        return $this;
-    }
-
+  
     public function getImage(): ?string
     {
         return $this->image;
@@ -169,5 +143,37 @@ class Produit
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, lignecommandes>
+     */
+    public function getLignecommandes(): Collection
+    {
+        return $this->lignecommandes;
+    }
+
+    public function addLignecommande(Lignecommande $lignecommande): self
+    {
+        if (!$this->lignecommandes->contains($lignecommande)) {
+            $this->lignecommandes[] = $lignecommande;
+            $lignecommande->setProduit($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLignecommande(Lignecommande $lignecommande): self
+    {
+        if ($this->lignecommandes->removeElement($lignecommande)) {
+            // set the owning side to null (unless already changed)
+            if ($lignecommande->getProduit() === $this) {
+                $lignecommande->setProduit(null);
+            }
+        }
+
+        return $this;
+    }
+
+   
 
 }

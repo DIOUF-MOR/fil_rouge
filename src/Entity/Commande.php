@@ -2,12 +2,19 @@
 
 namespace App\Entity;
 
-use App\Repository\CommandeRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use App\Entity\Zone;
+use App\Entity\Produit;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\CommandeRepository;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CommandeRepository::class)]
+#[ApiResource(
+    normalizationContext: ["groups"=>["commande:read"]]
+)]
 class Commande
 {
     #[ORM\Id]
@@ -15,22 +22,42 @@ class Commande
     #[ORM\Column(type: 'integer')]
     private $id;
 
-    #[ORM\ManyToMany(targetEntity: Produit::class, inversedBy: 'commandes')]
-    private $produits;
+  
 
+    #[Groups(["commande:read"])]
     #[ORM\Column(type: 'date')]
     private $date;
 
+
+    #[Groups(["commande:read"])]
     #[ORM\Column(type: 'float')]
     private $montant;
 
+    #[Groups(["commande:read"])]
     #[ORM\ManyToOne(targetEntity: Zone::class, inversedBy: 'commandes')]
     #[ORM\JoinColumn(nullable: false)]
     private $zone;
 
+    #[Groups(["commande:read"])]
+    #[ORM\Column(type: 'string', length: 50)]
+    private $numeroCommande;
+
+    #[Groups(["commande:read"])]
+    #[ORM\ManyToMany(targetEntity: Client::class, mappedBy: 'commandes')]
+    private $clients;
+
+    #[Groups(["commande:read"])]
+    #[ORM\ManyToOne(targetEntity: Gestionnaire::class, inversedBy: 'commandes')]
+    private $gestionnaire;
+
+    #[ORM\ManyToOne(targetEntity: Livraison::class, inversedBy: 'commandes')]
+    private $livraison;
+
+
     public function __construct()
     {
-        $this->produits = new ArrayCollection();
+        $this->clients = new ArrayCollection();
+        $this->produitCommandes = new ArrayCollection();
     }
 
 
@@ -39,29 +66,8 @@ class Commande
         return $this->id;
     }
 
-    /**
-     * @return Collection<int, Produit>
-     */
-    public function getProduits(): Collection
-    {
-        return $this->produits;
-    }
+   
 
-    public function addProduit(Produit $produit): self
-    {
-        if (!$this->produits->contains($produit)) {
-            $this->produits[] = $produit;
-        }
-
-        return $this;
-    }
-
-    public function removeProduit(Produit $produit): self
-    {
-        $this->produits->removeElement($produit);
-
-        return $this;
-    }
 
     public function getDate(): ?\DateTimeInterface
     {
@@ -97,6 +103,57 @@ class Commande
         $this->zone = $zone;
 
         return $this;
+    }
+
+    public function getNumeroCommande(): ?string
+    {
+        return $this->numeroCommande;
+    }
+
+    public function setNumeroCommande(string $numeroCommande): self
+    {
+        $this->numeroCommande = $numeroCommande;
+
+        return $this;
+    }
+
+
+   
+
+    public function getGestionnaire(): ?Gestionnaire
+    {
+        return $this->gestionnaire;
+    }
+
+    public function setGestionnaire(?Gestionnaire $gestionnaire): self
+    {
+        $this->gestionnaire = $gestionnaire;
+
+        return $this;
+    }
+
+    public function getLivraison(): ?Livraison
+    {
+        return $this->livraison;
+    }
+
+    public function setLivraison(?Livraison $livraison): self
+    {
+        $this->livraison = $livraison;
+
+        return $this;
+    }
+
+ 
+
+   
+
+    /**
+     * Get the value of clients
+     */ 
+    public function getClients()
+    {
+        return $this->clients;
     }
 
    

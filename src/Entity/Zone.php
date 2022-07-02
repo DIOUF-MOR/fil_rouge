@@ -2,12 +2,17 @@
 
 namespace App\Entity;
 
-use App\Repository\ZoneRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\ZoneRepository;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ZoneRepository::class)]
+#[ApiResource(
+    normalizationContext: ["groups"=>["zone:read","commande:read"]]
+)]
 class Zone
 {
     #[ORM\Id]
@@ -15,14 +20,23 @@ class Zone
     #[ORM\Column(type: 'integer')]
     private $id;
 
+    #[Groups(["zone:read","commande:read"])]
     #[ORM\Column(type: 'float')]
     private $prix_livraison;
 
     #[ORM\OneToMany(mappedBy: 'zone', targetEntity: Commande::class)]
     private $commandes;
 
+    #[Groups(["zone:read","commande:read"])]
     #[ORM\OneToMany(mappedBy: 'zone', targetEntity: Quartier::class)]
     private $quartiers;
+
+    #[Groups(["zone:read","commande:read"])]
+    #[ORM\Column(type: 'string', length: 50)]
+    private $nom;
+
+    #[ORM\ManyToOne(targetEntity: Gestionnaire::class, inversedBy: 'zones')]
+    private $gestionnaire;
 
     public function __construct()
     {
@@ -103,6 +117,30 @@ class Zone
                 $quartier->setZone(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getNom(): ?string
+    {
+        return $this->nom;
+    }
+
+    public function setNom(string $nom): self
+    {
+        $this->nom = $nom;
+
+        return $this;
+    }
+
+    public function getGestionnaire(): ?Gestionnaire
+    {
+        return $this->gestionnaire;
+    }
+
+    public function setGestionnaire(?Gestionnaire $gestionnaire): self
+    {
+        $this->gestionnaire = $gestionnaire;
 
         return $this;
     }

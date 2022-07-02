@@ -20,11 +20,11 @@ class Personne
     protected $id;
 
     #[Assert\NotBlank(message:"Ce champ ne peut pas etre vide")]
-    #[Groups(["client:read","gestionnaire:read","livreur:read"])]
+    #[Groups(["client:read","gestionnaire:read","livreur:read","annonyme:read"])]
     #[ORM\Column(type: 'string', length: 255)]
     protected $nom;
 
-    #[Groups(["client:read","gestionnaire:read","livreur:read"])]
+    #[Groups(["client:read","gestionnaire:read","livreur:read","annonyme:read"])]
     #[ORM\Column(type: 'string', length: 50)]
     protected $prenom;
 

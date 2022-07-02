@@ -10,18 +10,18 @@ use ApiPlatform\Core\Annotation\ApiResource;
 
 #[ORM\Entity(repositoryClass: MenuRepository::class)]
 #[ApiResource(
-    normalizationContext: ["groups"=>["menu:read"]]
+    normalizationContext: ["groups"=>["menu:read","lignecommandes:read","commande:read"]]
 )]
 class Menu extends Produit
 {
     #[ORM\ManyToMany(targetEntity: Burger::class, inversedBy: 'menus')]
     private $burgers;
 
-    #[ORM\ManyToMany(targetEntity: Frite::class, inversedBy: 'menus')]
+    #[ORM\ManyToMany(targetEntity: Frite::class, mappedBy: 'menus')]
     private $frites;
 
-    #[ORM\ManyToMany(targetEntity: Boisson::class, inversedBy: 'menus')]
-    private $boissons;
+    #[ORM\ManyToMany(targetEntity: Taille::class, inversedBy: 'menus')]
+    private $tailles;
 
 
 
@@ -30,7 +30,7 @@ class Menu extends Produit
         parent::__construct();
         $this->burgers = new ArrayCollection();
         $this->frites = new ArrayCollection();
-        $this->boissons = new ArrayCollection();
+        $this->tailles = new ArrayCollection();
        
        
     }
@@ -58,30 +58,53 @@ class Menu extends Produit
 
         return $this;
     }
-
-  
-   
-
     /**
-     * @return Collection<int, Boisson>
+     * @return Collection<int, Frite>
      */
-    public function getBoissons(): Collection
+    public function getFrites(): Collection
     {
-        return $this->boissons;
+        return $this->frites;
     }
 
-    public function addBoisson(Boisson $boisson): self
+    public function addFrite(Frite $frite): self
     {
-        if (!$this->boissons->contains($boisson)) {
-            $this->boissons[] = $boisson;
+        if (!$this->frites->contains($frite)) {
+            $this->frites[] = $frite;
+            $frite->addMenu($this);
         }
 
         return $this;
     }
 
-    public function removeBoisson(Boisson $boisson): self
+    public function removeFrite(Frite $frite): self
     {
-        $this->boissons->removeElement($boisson);
+        if ($this->frites->removeElement($frite)) {
+            $frite->removeMenu($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Taille>
+     */
+    public function getTailles(): Collection
+    {
+        return $this->tailles;
+    }
+
+    public function addTaille(Taille $taille): self
+    {
+        if (!$this->tailles->contains($taille)) {
+            $this->tailles[] = $taille;
+        }
+
+        return $this;
+    }
+
+    public function removeTaille(Taille $taille): self
+    {
+        $this->tailles->removeElement($taille);
 
         return $this;
     }

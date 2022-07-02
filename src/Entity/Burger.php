@@ -11,7 +11,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: BurgerRepository::class)]
 #[ApiResource(
-    normalizationContext: ["groups"=>["burger:read"]]
+  
+    normalizationContext: ["groups"=>["burger:read","lignecommandes:read","commande:read"]]
 )]
 class Burger extends Produit
 {
