@@ -10,10 +10,10 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: BurgerRepository::class)]
-#[ApiResource(
+// #[ApiResource(
   
-    normalizationContext: ["groups"=>["burger:read","lignecommandes:read","commande:read"]]
-)]
+//     normalizationContext: ["groups"=>["burger:read","lignecommandes:read","commande:read"]]
+// )]
 class Burger extends Produit
 {
     #[ORM\ManyToMany(targetEntity: Menu::class, mappedBy: 'burgers')]

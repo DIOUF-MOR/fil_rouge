@@ -10,9 +10,9 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: LignecommandeRepository::class)]
-#[ApiResource(
-    normalizationContext: ["groups"=>["lignecommande:read","commande:read"]]
-)]
+// #[ApiResource(
+//     normalizationContext: ["groups"=>["lignecommande:read","commande:read"]]
+// )]
 class Lignecommande
 {
 
@@ -27,13 +27,12 @@ class Lignecommande
     #[ORM\Column(type: 'string', length: 100)]
     protected $quantité;
 
-
     #[Groups(["lignecommandes:read","commande:read"])]
-    #[ORM\ManyToOne(targetEntity: Produit::class, inversedBy: 'lignecommande')]
+    #[ORM\ManyToOne(targetEntity: Produit::class, inversedBy: 'lignecommandes')]
     protected $produit;
 
-
-    
+    #[ORM\ManyToOne(targetEntity: Commande::class, inversedBy: 'lignecommandes')]
+    protected $commande;
 
 
     public function getId(): ?int
@@ -63,6 +62,18 @@ class Lignecommande
     public function setProduit(?Produit $produit): self
     {
         $this->produit = $produit;
+
+        return $this;
+    }
+
+    public function getCommande(): ?Commande
+    {
+        return $this->commande;
+    }
+
+    public function setCommande(?Commande $commande): self
+    {
+        $this->commande = $commande;
 
         return $this;
     }

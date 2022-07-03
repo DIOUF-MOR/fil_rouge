@@ -9,9 +9,9 @@ use App\Repository\MenuRepository;
 use ApiPlatform\Core\Annotation\ApiResource;
 
 #[ORM\Entity(repositoryClass: MenuRepository::class)]
-#[ApiResource(
-    normalizationContext: ["groups"=>["menu:read","lignecommandes:read","commande:read"]]
-)]
+// #[ApiResource(
+//     normalizationContext: ["groups"=>["menu:read","lignecommandes:read","commande:read"]]
+// )]
 class Menu extends Produit
 {
     #[ORM\ManyToMany(targetEntity: Burger::class, inversedBy: 'menus')]

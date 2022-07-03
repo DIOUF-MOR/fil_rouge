@@ -16,22 +16,22 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\DiscriminatorColumn(name:"genre",type:"string")]
 #[ORM\DiscriminatorMap(["burger"=>"Burger","menu"=>"Menu","boisson"=>"Boisson","frite"=>"Frite"])]
 #[ApiResource(
-    normalizationContext: ["groups"=>["produit:read"]]
+    normalizationContext: ["groups"=>["produit:read","commande:read","lignecommande:read"]]
 )]
 class Produit 
 {
-    #[Groups(["burger:read","boisson:read","menu:read","frite:read"])]
+    #[Groups(["burger:read","boisson:read","menu:read","frite:read","lignecommande:read","commande:read"])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     protected $id;
 
-    #[Groups(["burger:read","boisson:read","menu:read","frite:read"])]
+    #[Groups(["burger:read","boisson:read","menu:read","frite:read","lignecommande:read","commande:read"])]
     #[ORM\Column(type: 'string', length: 50)]
     protected $nom;
 
     
-    #[Groups(["burger:read","boisson:read","menu:read","frite:read"])]
+    #[Groups(["burger:read","boisson:read","menu:read","frite:read","lignecommande:read","commande:read"])]
     #[ORM\Column(type: 'float')]
     protected $prix;
 
@@ -48,12 +48,15 @@ class Produit
     #[ORM\ManyToOne(targetEntity: Gestionnaire::class, inversedBy: 'produits')]
     protected $gestionnaire;
 
-    #[Groups(["burger:read","boisson:read","menu:read","frite:read",])]
+    #[Groups(["burger:read","boisson:read","menu:read","frite:read","lignecommande:read","commande:read"])]
     #[ORM\Column(type: 'string', length: 100, nullable: true)]
     protected $description;
 
+    #[Groups(["burger:read","boisson:read","menu:read","frite:read","lignecommande:read","commande:read"])]
     #[ORM\OneToMany(mappedBy: 'produit', targetEntity: Lignecommande::class)]
-    private $lignecommandes;
+    protected $lignecommandes;
+
+  
 
     public function __construct()
     {
@@ -145,7 +148,7 @@ class Produit
     }
 
     /**
-     * @return Collection<int, lignecommandes>
+     * @return Collection<int, Lignecommande>
      */
     public function getLignecommandes(): Collection
     {
@@ -174,6 +177,6 @@ class Produit
         return $this;
     }
 
-   
+    
 
 }

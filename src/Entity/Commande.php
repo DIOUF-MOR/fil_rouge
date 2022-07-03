@@ -53,11 +53,14 @@ class Commande
     #[ORM\ManyToOne(targetEntity: Livraison::class, inversedBy: 'commandes')]
     private $livraison;
 
+    #[ORM\OneToMany(mappedBy: 'commande', targetEntity: Lignecommande::class)]
+    private $lignecommandes;
+
 
     public function __construct()
     {
         $this->clients = new ArrayCollection();
-        $this->produitCommandes = new ArrayCollection();
+        $this->lignecommandes = new ArrayCollection();
     }
 
 
@@ -144,16 +147,42 @@ class Commande
         return $this;
     }
 
- 
-
-   
-
     /**
      * Get the value of clients
      */ 
     public function getClients()
     {
         return $this->clients;
+    }
+
+    /**
+     * @return Collection<int, Lignecommande>
+     */
+    public function getLignecommandes(): Collection
+    {
+        return $this->lignecommandes;
+    }
+
+    public function addLignecommande(Lignecommande $lignecommande): self
+    {
+        if (!$this->lignecommandes->contains($lignecommande)) {
+            $this->lignecommandes[] = $lignecommande;
+            $lignecommande->setCommande($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLignecommande(Lignecommande $lignecommande): self
+    {
+        if ($this->lignecommandes->removeElement($lignecommande)) {
+            // set the owning side to null (unless already changed)
+            if ($lignecommande->getCommande() === $this) {
+                $lignecommande->setCommande(null);
+            }
+        }
+
+        return $this;
     }
 
    
