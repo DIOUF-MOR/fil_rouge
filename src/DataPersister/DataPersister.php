@@ -1,7 +1,8 @@
 <?php
-namespace App\Services;
+namespace App\DataPersister;
 
 use App\Entity\User;
+use App\Services\MailerService;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\HttpCache\Esi;
@@ -27,9 +28,7 @@ class DataPersister implements ContextAwareDataPersisterInterface{
 
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    
     public function persist($data, array $context = []){
        
         if($data->getPassword()){

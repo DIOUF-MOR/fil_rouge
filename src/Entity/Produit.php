@@ -9,52 +9,58 @@ use App\Repository\ProduitRepository;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\DBAL\Types\BlobType;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\SerializedName;
 
 #[ORM\Entity(repositoryClass: ProduitRepository::class)]
 #[ORM\InheritanceType('JOINED')]
 #[ORM\DiscriminatorColumn(name:"genre",type:"string")]
 #[ORM\DiscriminatorMap(["burger"=>"Burger","menu"=>"Menu","boisson"=>"Boisson","frite"=>"Frite"])]
 #[ApiResource(
-    normalizationContext: ["groups"=>["produit:read","commande:read","lignecommande:read"]]
+    normalizationContext: ["groups"=>["produit:read","commande:read","taille:read"]]
 )]
 class Produit 
 {
-    #[Groups(["burger:read","boisson:read","menu:read","frite:read","lignecommande:read","commande:read"])]
+    #[Groups(["burger:read","boisson:read","menu:read","frite:read","frite:write","taille:read", "commande:read","menu:write","catalogue:read"])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     protected $id;
 
-    #[Groups(["burger:read","boisson:read","menu:read","frite:read","lignecommande:read","commande:read"])]
-    #[ORM\Column(type: 'string', length: 50)]
+    #[Groups(["burger:read","boisson:write","boisson:read","frite:read","taille:read","burger:write","catalogue:read"])]
+    #[ORM\Column(type: 'string', length: 50, nullable: true)]
     protected $nom;
-
-    
-    #[Groups(["burger:read","boisson:read","menu:read","frite:read","lignecommande:read","commande:read"])]
-    #[ORM\Column(type: 'float')]
-    protected $prix;
-
    
-    #[Groups(["burger:read","boisson:read","menu:read","frite:read","lignecommande:read","commande:read"])]
-    #[ORM\Column(type: 'text')]
+    #[Groups(["boisson:read","menu:read","frite:read","catalogue:read"])]
+    #[ORM\Column(type: 'blob', nullable: true)]
     protected $image;
 
-    #[Groups(["burger:read","boisson:read","menu:read","frite:read","lignecommande:read","commande:read"])]
-    #[ORM\Column(type: 'integer')]
+    #[Groups(["burger:write","boisson:write","boisson:read","frite:read","catalogue:read"])]
+    #[SerializedName('Images')]
+    protected $faut_image;
+
+
+    #[Groups(["burger:read","burger:write","menu:read","frite:read","frite:write","catalogue:read"])]
+    #[ORM\Column(type: 'integer', nullable: true)]
     protected $etat;
 
-    #[Groups(["burger:read","boisson:read","menu:read","frite:read","lignecommande:read","commande:read"])]
+    #[Groups(["burger:read","boisson:read","menu:read","frite:read","catalogue:read"])]
     #[ORM\ManyToOne(targetEntity: Gestionnaire::class, inversedBy: 'produits')]
     protected $gestionnaire;
 
-    #[Groups(["burger:read","boisson:read","menu:read","frite:read","lignecommande:read","commande:read"])]
+    #[Groups(["burger:read","boisson:read","frite:read","frite:write","taille:read","catalogue:read"])]
     #[ORM\Column(type: 'string', length: 100, nullable: true)]
     protected $description;
 
-    #[Groups(["burger:read","boisson:read","menu:read","frite:read","lignecommande:read","commande:read"])]
+    // #[Groups(["burger:read","boisson:read","menu:read","frite:read"])]
     #[ORM\OneToMany(mappedBy: 'produit', targetEntity: Lignecommande::class)]
     protected $lignecommandes;
+
+
+    #[Groups(["menu:read","commande:read","catalogue:read"])]
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private $prix;
 
   
 
@@ -85,22 +91,12 @@ class Produit
 
     
 
-    public function getPrix(): ?float
-    {
-        return $this->prix;
-    }
-
-    public function setPrix(float $prix): self
-    {
-        $this->prix = $prix;
-
-        return $this;
-    }
 
   
-    public function getImage(): ?string
+    public function getImage(): string
     {
-        return $this->image;
+        $result = is_resource($this->image) ? utf8_decode(base64_encode(stream_get_contents($this->image))) : $this->image;
+        return $result;
     }
 
     public function setImage(string $image): self
@@ -173,6 +169,18 @@ class Produit
                 $lignecommande->setProduit(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPrix(): ?int
+    {
+        return $this->prix;
+    }
+
+    public function setPrix(?int $prix): self
+    {
+        $this->prix = $prix;
 
         return $this;
     }

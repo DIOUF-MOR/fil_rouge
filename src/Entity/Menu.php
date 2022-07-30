@@ -2,111 +2,217 @@
 
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\MenuRepository;
+use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiSubresource;
+use App\Controller\MenuController;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Annotation\SerializedName;
 
 #[ORM\Entity(repositoryClass: MenuRepository::class)]
-// #[ApiResource(
-//     normalizationContext: ["groups"=>["menu:read","lignecommandes:read","commande:read"]]
-// )]
+#[ApiResource(
+    normalizationContext: ["groups" => ["menu:read"]],
+    denormalizationContext: ["groups" => ["menu:write"]],
+
+)]
 class Menu extends Produit
 {
-    #[ORM\ManyToMany(targetEntity: Burger::class, inversedBy: 'menus')]
-    private $burgers;
+    // #[ORM\Column(type: 'string', length: 50)]
+    // protected string $nommme;
 
-    #[ORM\ManyToMany(targetEntity: Frite::class, mappedBy: 'menus')]
-    private $frites;
+    #[Groups(["menu:read", "menu:write"])]
+    #[ORM\Column(type: 'string', length: 50, nullable: true)]
+    #[SerializedName("nom")]
+    private $namme;
 
-    #[ORM\ManyToMany(targetEntity: Taille::class, inversedBy: 'menus')]
-    private $tailles;
+    #[Groups(["boisson:read", "menu:read", "frite:read", "menu:write"])]
+    protected $immage;
+
+    #[Groups(["menu:read", "menu:write"])]
+    #[ORM\OneToMany(mappedBy: 'menu', targetEntity: Menutaille::class, cascade: ["persist"])]
+    #[SerializedName("boissons")]
+    protected $menutailles;
 
 
+    #[Groups(["menu:read", "menu:write"])]
+    #[ORM\OneToMany(mappedBy: 'menu', targetEntity: Menufrite::class, cascade: ["persist"])]
+    #[SerializedName("Frites")]
+    protected $menufrites;
+
+
+    #[Groups(["menu:read", "menu:write"])]
+    #[ORM\OneToMany(mappedBy: 'menu', targetEntity: Menuburger::class, cascade: ["persist"])]
+    #[SerializedName("burgers")]
+    private $menuburgers;
 
     public function __construct()
     {
         parent::__construct();
-        $this->burgers = new ArrayCollection();
-        $this->frites = new ArrayCollection();
-        $this->tailles = new ArrayCollection();
-       
-       
+        $this->menutailles = new ArrayCollection();
+        $this->menufrites = new ArrayCollection();
+        $this->menuburgers = new ArrayCollection();
+    }
+
+    public function addBurger(Burger $burger, int $qnt)
+    {
+        $newburger = new Menuburger();
+
+        $newburger->setBurger($burger);
+        $newburger->setQnt($qnt);
+        $newburger->setMenu($this);
+
+        $this->addMenuburger($newburger);
+    }
+
+    public function addFrite(Frite $frite, int $qnt)
+    {
+        $newfrite = new Menufrite();
+
+        $newfrite->setFrite($frite);
+        $newfrite->setQnt($qnt);
+        $newfrite->setMenu($this);
+
+        $this->addMenufrite($newfrite);
+    }
+
+    public function addTaille(Taille $taille, int $qnt)
+    {
+        $newtaille = new Menutaille();
+
+        $newtaille->setTaille($taille);
+        $newtaille->setQnt($qnt);
+        $newtaille->setMenu($this);
+
+        $this->addMenutaille($newtaille);
+    }
+
+
+
+    /**
+     * @return Collection<int, Menutaille>
+     */
+    public function getMenutailles(): Collection
+    {
+        return $this->menutailles;
+    }
+
+    public function addMenutaille(Menutaille $menutaille): self
+    {
+        if (!$this->menutailles->contains($menutaille)) {
+            $this->menutailles[] = $menutaille;
+            $menutaille->setMenu($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMenutaille(Menutaille $menutaille): self
+    {
+        if ($this->menutailles->removeElement($menutaille)) {
+            // set the owning side to null (unless already changed)
+            if ($menutaille->getMenu() === $this) {
+                $menutaille->setMenu(null);
+            }
+        }
+
+        return $this;
     }
 
     /**
-     * @return Collection<int, Burger>
+     * @return Collection<int, Menufrite>
      */
-    public function getBurgers(): Collection
+    public function getMenufrites(): Collection
     {
-        return $this->burgers;
+        return $this->menufrites;
     }
 
-    public function addBurger(Burger $burger): self
+    public function addMenufrite(Menufrite $menufrite): self
     {
-        if (!$this->burgers->contains($burger)) {
-            $this->burgers[] = $burger;
+        if (!$this->menufrites->contains($menufrite)) {
+            $this->menufrites[] = $menufrite;
+            $menufrite->setMenu($this);
         }
 
         return $this;
     }
 
-    public function removeBurger(Burger $burger): self
+    public function removeMenufrite(Menufrite $menufrite): self
     {
-        $this->burgers->removeElement($burger);
-
-        return $this;
-    }
-    /**
-     * @return Collection<int, Frite>
-     */
-    public function getFrites(): Collection
-    {
-        return $this->frites;
-    }
-
-    public function addFrite(Frite $frite): self
-    {
-        if (!$this->frites->contains($frite)) {
-            $this->frites[] = $frite;
-            $frite->addMenu($this);
+        if ($this->menufrites->removeElement($menufrite)) {
+            // set the owning side to null (unless already changed)
+            if ($menufrite->getMenu() === $this) {
+                $menufrite->setMenu(null);
+            }
         }
 
         return $this;
     }
 
-    public function removeFrite(Frite $frite): self
+
+
+    public function getNamme(): ?string
     {
-        if ($this->frites->removeElement($frite)) {
-            $frite->removeMenu($this);
-        }
+        return $this->namme;
+    }
+
+    public function setNamme(string $namme): self
+    {
+        $this->namme = $namme;
 
         return $this;
     }
 
     /**
-     * @return Collection<int, Taille>
+     * @return Collection<int, Menuburger>
      */
-    public function getTailles(): Collection
+    public function getMenuburgers(): Collection
     {
-        return $this->tailles;
+        return $this->menuburgers;
     }
 
-    public function addTaille(Taille $taille): self
+    public function addMenuburger(Menuburger $menuburger): self
     {
-        if (!$this->tailles->contains($taille)) {
-            $this->tailles[] = $taille;
+        if (!$this->menuburgers->contains($menuburger)) {
+            $this->menuburgers[] = $menuburger;
+            $menuburger->setMenu($this);
         }
 
         return $this;
     }
 
-    public function removeTaille(Taille $taille): self
+    public function removeMenuburger(Menuburger $menuburger): self
     {
-        $this->tailles->removeElement($taille);
+        if ($this->menuburgers->removeElement($menuburger)) {
+            // set the owning side to null (unless already changed)
+            if ($menuburger->getMenu() === $this) {
+                $menuburger->setMenu(null);
+            }
+        }
 
         return $this;
     }
-   
+
+    /**
+     * Get the value of immage
+     */ 
+    public function getImmage()
+    {
+        return $this->immage;
+    }
+
+    /**
+     * Set the value of immage
+     *
+     * @return  self
+     */ 
+    public function setImmage($immage)
+    {
+        $this->immage = $immage;
+
+        return $this;
+    }
 }

@@ -1,15 +1,13 @@
 <?php
 
-namespace App\Entity;
-
 use ApiPlatform\Core\Annotation\ApiResource;
 
 #[ApiResource(
-    normalizationContext: ["groups" => ['catalogue:read']],
+    
+    normalizationContext: ["groups" => ['group:catalogue']],
     collectionOperations: ["get"],
     itemOperations: []
 )]
-class Catalogue
-{
-    private  $id;
+class Complement{
+
 }

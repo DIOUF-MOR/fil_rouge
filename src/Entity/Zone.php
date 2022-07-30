@@ -24,10 +24,8 @@ class Zone
     #[ORM\Column(type: 'float')]
     private $prix_livraison;
 
-    #[ORM\OneToMany(mappedBy: 'zone', targetEntity: Commande::class)]
-    private $commandes;
 
-    #[Groups(["zone:read","commande:read"])]
+    #[Groups(["zone:read"])]
     #[ORM\OneToMany(mappedBy: 'zone', targetEntity: Quartier::class)]
     private $quartiers;
 
@@ -38,9 +36,13 @@ class Zone
     #[ORM\ManyToOne(targetEntity: Gestionnaire::class, inversedBy: 'zones')]
     private $gestionnaire;
 
+    #[ORM\OneToMany(mappedBy: 'zone', targetEntity: Commande::class)]
+    private $commandes;
+
+
     public function __construct()
     {
-        $this->commandes = new ArrayCollection();
+        // $this->commandes = new ArrayCollection();
         $this->quartiers = new ArrayCollection();
     }
 
@@ -61,35 +63,6 @@ class Zone
         return $this;
     }
 
-    /**
-     * @return Collection<int, Commande>
-     */
-    public function getCommandes(): Collection
-    {
-        return $this->commandes;
-    }
-
-    public function addCommande(Commande $commande): self
-    {
-        if (!$this->commandes->contains($commande)) {
-            $this->commandes[] = $commande;
-            $commande->setZone($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCommande(Commande $commande): self
-    {
-        if ($this->commandes->removeElement($commande)) {
-            // set the owning side to null (unless already changed)
-            if ($commande->getZone() === $this) {
-                $commande->setZone(null);
-            }
-        }
-
-        return $this;
-    }
 
     /**
      * @return Collection<int, Quartier>
@@ -144,4 +117,38 @@ class Zone
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, Commande>
+     */
+    public function getCommandes(): Collection
+    {
+        return $this->commandes;
+    }
+
+    public function addCommande(Commande $commande): self
+    {
+        if (!$this->commandes->contains($commande)) {
+            $this->commandes[] = $commande;
+            $commande->setZone($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCommande(Commande $commande): self
+    {
+        if ($this->commandes->removeElement($commande)) {
+            // set the owning side to null (unless already changed)
+            if ($commande->getZone() === $this) {
+                $commande->setZone(null);
+            }
+        }
+
+        return $this;
+    }
+
+
+
+   
 }

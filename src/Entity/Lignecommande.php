@@ -8,31 +8,50 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\LignecommandeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\SerializedName;
 
 #[ORM\Entity(repositoryClass: LignecommandeRepository::class)]
-// #[ApiResource(
-//     normalizationContext: ["groups"=>["lignecommande:read","commande:read"]]
-// )]
+#[ApiResource(
+    normalizationContext: ["groups" => ["lignecommande:read", "commande:read"]],
+    denormalizationContext: ["groups" => ["lignecommande:write","commande:write"]]
+)]
 class Lignecommande
 {
 
-    #[Groups(["lignecommandes:read","commande:read"])]
+    #[Groups(["lignecommande:read"])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    protected $id;
+    private $id;
 
-    
-    #[Groups(["lignecommandes:read","commande:read"])]
-    #[ORM\Column(type: 'string', length: 100)]
-    protected $quantité;
 
-    #[Groups(["lignecommandes:read","commande:read"])]
+    #[Groups(["commande:read","commande:write","lignecommande:read","lignecommande:write"])]
+    #[ORM\Column(type: 'integer', length: 100)]
+    private $quantité;
+
+    #[Groups(["commande:read","commande:write","lignecommande:read","lignecommande:write"])]
     #[ORM\ManyToOne(targetEntity: Produit::class, inversedBy: 'lignecommandes')]
-    protected $produit;
+    private $produit;
 
-    #[ORM\ManyToOne(targetEntity: Commande::class, inversedBy: 'lignecommandes')]
-    protected $commande;
+    #[Groups(["lignecommande:read"])]
+    #[ORM\ManyToMany(targetEntity: Commande::class, mappedBy: 'lignecommandes')]
+    private $commandes;
+
+    #[Groups(["lignecommande:read","lignecommande:write"])]
+    #[ORM\OneToMany(mappedBy: 'lignecommande', targetEntity: Boissontaille::class)]
+    #[SerializedName("Boissons")]
+    private $boissontailles;
+
+    public function __construct()
+    {
+        $this->boissontailles = new ArrayCollection();
+    }
+
+    // public function __construct()
+    // {
+    //     $this->commandes = new ArrayCollection();
+    // }
+
 
 
     public function getId(): ?int
@@ -66,20 +85,60 @@ class Lignecommande
         return $this;
     }
 
-    public function getCommande(): ?Commande
+    /**
+     * @return Collection<int, Commande>
+     */
+    public function getCommandes(): Collection
     {
-        return $this->commande;
+        return $this->commandes;
     }
 
-    public function setCommande(?Commande $commande): self
+    public function addCommande(Commande $commande): self
     {
-        $this->commande = $commande;
+        if (!$this->commandes->contains($commande)) {
+            $this->commandes[] = $commande;
+            $commande->addLignecommande($this);
+        }
 
         return $this;
     }
 
- 
+    public function removeCommande(Commande $commande): self
+    {
+        if ($this->commandes->removeElement($commande)) {
+            $commande->removeLignecommande($this);
+        }
 
-   
+        return $this;
+    }
 
+    /**
+     * @return Collection<int, Boissontaille>
+     */
+    public function getBoissontailles(): Collection
+    {
+        return $this->boissontailles;
+    }
+
+    public function addBoissontaille(Boissontaille $boissontaille): self
+    {
+        if (!$this->boissontailles->contains($boissontaille)) {
+            $this->boissontailles[] = $boissontaille;
+            $boissontaille->setLignecommande($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBoissontaille(Boissontaille $boissontaille): self
+    {
+        if ($this->boissontailles->removeElement($boissontaille)) {
+            // set the owning side to null (unless already changed)
+            if ($boissontaille->getLignecommande() === $this) {
+                $boissontaille->setLignecommande(null);
+            }
+        }
+
+        return $this;
+    }
 }

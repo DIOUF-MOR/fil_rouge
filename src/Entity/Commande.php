@@ -10,56 +10,61 @@ use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\SerializedName;
 
 #[ORM\Entity(repositoryClass: CommandeRepository::class)]
 #[ApiResource(
-    normalizationContext: ["groups"=>["commande:read"]]
+    normalizationContext: ["groups"=>["commande:read"]],
+    denormalizationContext: ["groups"=>["commande:write"]]
 )]
 class Commande
 {
+    
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     private $id;
-
-  
-
+    
     #[Groups(["commande:read"])]
-    #[ORM\Column(type: 'date')]
+    #[ORM\Column(type: 'float', nullable: true)]
+    private $montant;
+    
+    // #[Groups(["commande:read","commande:write"])]
+    #[ORM\Column(type: 'date', nullable: true)]
     private $date;
 
-
-    #[Groups(["commande:read"])]
-    #[ORM\Column(type: 'float')]
-    private $montant;
-
-    #[Groups(["commande:read"])]
-    #[ORM\ManyToOne(targetEntity: Zone::class, inversedBy: 'commandes')]
-    #[ORM\JoinColumn(nullable: false)]
-    private $zone;
-
-    #[Groups(["commande:read"])]
-    #[ORM\Column(type: 'string', length: 50)]
+    // #[Groups(["commande:read","commande:write"])]
+    #[ORM\Column(type: 'string', length: 50, nullable: true)]
     private $numeroCommande;
 
-    #[Groups(["commande:read"])]
-    #[ORM\ManyToMany(targetEntity: Client::class, mappedBy: 'commandes')]
-    private $clients;
-
-    #[Groups(["commande:read"])]
+    // #[Groups(["commande:read"])]
     #[ORM\ManyToOne(targetEntity: Gestionnaire::class, inversedBy: 'commandes')]
     private $gestionnaire;
 
     #[ORM\ManyToOne(targetEntity: Livraison::class, inversedBy: 'commandes')]
     private $livraison;
 
-    #[ORM\OneToMany(mappedBy: 'commande', targetEntity: Lignecommande::class)]
+    #[Groups(["commande:read","commande:write"])]
+    #[ORM\ManyToMany(targetEntity: Lignecommande::class, inversedBy: 'commandes',cascade:["persist"])]
+    #[SerializedName("Produits")]
     private $lignecommandes;
+
+    // #[Groups(["commande:read","commande:write"])]
+    #[ORM\ManyToOne(targetEntity: Client::class, inversedBy: 'commandes')]
+    private $clients;
+
+    #[Groups(["commande:read","commande:write"])]
+    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    private $etat;
+
+    #[Groups(["commande:read","commande:write"])]
+    #[ORM\ManyToOne(targetEntity: Zone::class, inversedBy: 'commandes')]
+    private $zone;
 
 
     public function __construct()
     {
-        $this->clients = new ArrayCollection();
+        // $this->clients = new ArrayCollection();
         $this->lignecommandes = new ArrayCollection();
     }
 
@@ -96,17 +101,6 @@ class Commande
         return $this;
     }
 
-    public function getZone(): ?Zone
-    {
-        return $this->zone;
-    }
-
-    public function setZone(?Zone $zone): self
-    {
-        $this->zone = $zone;
-
-        return $this;
-    }
 
     public function getNumeroCommande(): ?string
     {
@@ -147,13 +141,7 @@ class Commande
         return $this;
     }
 
-    /**
-     * Get the value of clients
-     */ 
-    public function getClients()
-    {
-        return $this->clients;
-    }
+
 
     /**
      * @return Collection<int, Lignecommande>
@@ -167,7 +155,6 @@ class Commande
     {
         if (!$this->lignecommandes->contains($lignecommande)) {
             $this->lignecommandes[] = $lignecommande;
-            $lignecommande->setCommande($this);
         }
 
         return $this;
@@ -175,15 +162,48 @@ class Commande
 
     public function removeLignecommande(Lignecommande $lignecommande): self
     {
-        if ($this->lignecommandes->removeElement($lignecommande)) {
-            // set the owning side to null (unless already changed)
-            if ($lignecommande->getCommande() === $this) {
-                $lignecommande->setCommande(null);
-            }
-        }
+        $this->lignecommandes->removeElement($lignecommande);
 
         return $this;
     }
 
+    public function getClients(): ?Client
+    {
+        return $this->clients;
+    }
+
+    public function setClients(?Client $clients): self
+    {
+        $this->clients = $clients;
+
+        return $this;
+    }
+
+    public function getEtat(): ?string
+    {
+        return $this->etat;
+    }
+
+    public function setEtat(string $etat): self
+    {
+        $this->etat = $etat;
+
+        return $this;
+    }
+
+    public function getZone(): ?Zone
+    {
+        return $this->zone;
+    }
+
+    public function setZone(?Zone $zone): self
+    {
+        $this->zone = $zone;
+
+        return $this;
+    }
+
+
    
+
 }

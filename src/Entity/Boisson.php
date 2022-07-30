@@ -2,49 +2,61 @@
 
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\BoissonRepository;
+use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: BoissonRepository::class)]
 #[ApiResource(
-    normalizationContext: ["groups"=>["boisson:read","lignecommandes:read","commande:read"]]
+    normalizationContext: ["groups" => ["boisson:read"]],
+    denormalizationContext: ["groups" => ["boisson:write"]]
 )]
 class Boisson extends Produit
 {
-   
 
-    #[ORM\ManyToMany(targetEntity: Taille::class, inversedBy: 'boissons')]
-    private $tailles;
+
+  
+    #[ORM\OneToMany(mappedBy: 'boisson', targetEntity: Boissontaille::class)]
+    private $boissontailles;
+
 
     public function __construct()
     {
         parent::__construct();
-        $this->tailles = new ArrayCollection();
+        $this->boissontailles = new ArrayCollection();
     }
+
+  
 
     /**
-     * @return Collection<int, Taille>
+     * @return Collection<int, Boissontaille>
      */
-    public function getTailles(): Collection
+    public function getBoissontailles(): Collection
     {
-        return $this->tailles;
+        return $this->boissontailles;
     }
 
-    public function addTaille(Taille $taille): self
+    public function addBoissontaille(Boissontaille $boissontaille): self
     {
-        if (!$this->tailles->contains($taille)) {
-            $this->tailles[] = $taille;
+        if (!$this->boissontailles->contains($boissontaille)) {
+            $this->boissontailles[] = $boissontaille;
+            $boissontaille->setBoisson($this);
         }
 
         return $this;
     }
 
-    public function removeTaille(Taille $taille): self
+    public function removeBoissontaille(Boissontaille $boissontaille): self
     {
-        $this->tailles->removeElement($taille);
+        if ($this->boissontailles->removeElement($boissontaille)) {
+            // set the owning side to null (unless already changed)
+            if ($boissontaille->getBoisson() === $this) {
+                $boissontaille->setBoisson(null);
+            }
+        }
 
         return $this;
     }

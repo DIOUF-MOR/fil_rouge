@@ -25,6 +25,10 @@ class Livraison
     #[ORM\ManyToOne(targetEntity: Gestionnaire::class, inversedBy: 'livraisons')]
     private $gestionnaire;
 
+    #[ORM\ManyToOne(targetEntity: Livreur::class, inversedBy: 'livraisons')]
+    private $livreur;
+
+
     public function __construct()
     {
         $this->commandes = new ArrayCollection();
@@ -76,4 +80,18 @@ class Livraison
 
         return $this;
     }
+
+    public function getLivreur(): ?Livreur
+    {
+        return $this->livreur;
+    }
+
+    public function setLivreur(?Livreur $livreur): self
+    {
+        $this->livreur = $livreur;
+
+        return $this;
+    }
+
+   
 }

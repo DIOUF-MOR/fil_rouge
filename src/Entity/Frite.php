@@ -7,46 +7,57 @@ use App\Repository\FriteRepository;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: FriteRepository::class)]
 #[ApiResource(
-    normalizationContext: ["groups"=>["frite:read"]]
+    normalizationContext: ["groups"=>["frite:read"]],
+    denormalizationContext: ["groups"=>["frite:write"]],
+  
 )]
 class Frite extends Produit
 {
-   
+    #[ORM\OneToMany(mappedBy: 'frite', targetEntity: Menufrite::class)]
+    private $menufrites;
 
-    #[ORM\ManyToMany(targetEntity: Menu::class, inversedBy: 'frites')]
-    private $menus;
+    #[Groups(["frite:read","frite:write"])]
+    private $prix;
 
     public function __construct()
     {
-        $this->menus = new ArrayCollection();
+        parent::__construct();
+        $this->menufrites = new ArrayCollection();
     }
-
-
 
     /**
-     * @return Collection<int, Menu>
+     * @return Collection<int, Menufrite>
      */
-    public function getMenus(): Collection
+    public function getMenufrites(): Collection
     {
-        return $this->menus;
+        return $this->menufrites;
     }
 
-    public function addMenu(Menu $menu): self
+    public function addMenufrite(Menufrite $menufrite): self
     {
-        if (!$this->menus->contains($menu)) {
-            $this->menus[] = $menu;
+        if (!$this->menufrites->contains($menufrite)) {
+            $this->menufrites[] = $menufrite;
+            $menufrite->setFrite($this);
         }
 
         return $this;
     }
 
-    public function removeMenu(Menu $menu): self
+    public function removeMenufrite(Menufrite $menufrite): self
     {
-        $this->menus->removeElement($menu);
+        if ($this->menufrites->removeElement($menufrite)) {
+            // set the owning side to null (unless already changed)
+            if ($menufrite->getFrite() === $this) {
+                $menufrite->setFrite(null);
+            }
+        }
 
         return $this;
     }
+
+   
 }
